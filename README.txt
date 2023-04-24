@@ -1,6 +1,9 @@
 UNI: msj2150
 NAME: Mohammad Saim Jamal
 
+Hello! This is a simple chat app that allows users to register with a server and communicate directly with eachother or create a group chat. This utilizes my own application protocol and UDP for transport layer protocol.
+
+
 Command line INPUT is:
 
 python3 ChatApp.py -s [Port Number]
