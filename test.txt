@@ -1,0 +1,375 @@
+test case 1:
+Note: test case doesn't have Z, and doesn't have the ctrl-c exiting.
+-server output :
+
+>>>[Server is online.]
+>>>[The client address is: ('127.0.0.1', 5000)
+>>>[The header is: register]
+>>>[USERNAME x added to table.]
+>>>[The client address is: ('127.0.0.1', 6000)
+>>>[The header is: register]
+>>>[USERNAME y added to table.]
+>>>[The client address is: ('127.0.0.1', 5000)
+>>>[The header is: dereg]
+>>>[Username x is now offline. Table updated.]
+>>>[The client address is: ('127.0.0.1', 6000)
+>>>[The header is: dereg]
+>>>[Username y is now offline. Table updated.]
+
+-X output:
+>>>[Registration message was sent.]
+>>>[Client now listening.]
+[Welcome, you are registered.]
+[Client table updated.]
+x 127.0.0.1 5000 Online
+>>>[Client table updated.]
+x 127.0.0.1 5000 Online
+y 127.0.0.1 6000 Online
+send y hi
+>>>[Message received by y.]
+>>>
+>>>y: hello
+
+>>>dereg
+ >>>[Invalid input.]
+>>>dereg x
+>>>[Attempting to disconnect...]
+[Client table updated.]
+x 127.0.0.1 5000 Offline
+y 127.0.0.1 6000 Online
+
+>>>[You are offline. Bye.]
+
+-Y output:
+>>>[Registration message was sent.]
+>>>[Client now listening.]
+[Welcome, you are registered.]
+[Client table updated.]
+x 127.0.0.1 5000 Online
+y 127.0.0.1 6000 Online
+>>>
+>>>x: hi
+
+>>>send x hello
+ >>>[Message received by x.]
+>>>[Client table updated.]
+x 127.0.0.1 5000 Offline
+y 127.0.0.1 6000 Online
+send x hello
+>>>[No ack received from x, message not delivered.]
+>>>dereg y
+>>>[Attempting to disconnect...]
+[Client table updated.]
+x 127.0.0.1 5000 Offline
+y 127.0.0.1 6000 Offline
+
+>>>[You are offline. Bye.]
+
+
+--TEST 2
+This test is for groups. The thing is that if a server is disconnected the client won't know unless it tries to
+deregister and server doesn't respond
+
+server output:
+
+>>>[Server is online.]
+>>>[The client address is: ('127.0.0.1', 5000)
+>>>[The header is: register]
+>>>[USERNAME x added to table.]
+>>>[The client address is: ('127.0.0.1', 6000)
+>>>[The header is: register]
+>>>[USERNAME y added to table.]
+>>>[The client address is: ('127.0.0.1', 6000)
+>>>[The header is: dereg]
+>>>[Username y is now offline. Table updated.]
+^CTraceback (most recent call last):
+  File "ChatApp.py", line 528, in <module>
+    serverMode(s_port)
+  File "ChatApp.py", line 143, in serverMode
+    buffer, client_address = server_socket.recvfrom(4096)
+KeyboardInterrupt
+
+X output:
+>>>[Registration message was sent.]
+>>>[Client now listening.]
+[Welcome, you are registered.]
+[Client table updated.]
+x 127.0.0.1 5000 Online
+>>>[Client table updated.]
+x 127.0.0.1 5000 Online
+y 127.0.0.1 6000 Online
+[Client table updated.]
+x 127.0.0.1 5000 Online
+y 127.0.0.1 6000 Offline
+send y hi
+>>>[No ack received from y, message not delivered.]
+>>>[No ack received from y, message not delivered.]
+>>>[No ack received from y, message not delivered.]
+>>>[No ack received from y, message not delivered.]
+>>>[No ack received from y, message not delivered.]
+>>>[No ack received. Message not delivered.
+>>>send y hi
+>>>[No ack received from y, message not delivered.]
+>>>[No ack received from y, message not delivered.]
+>>>[No ack received from y, message not delivered.]
+>>>[No ack received from y, message not delivered.]
+>>>[No ack received from y, message not delivered.]
+>>>[No ack received. Message not delivered.
+>>>^C>>>[Attempting to disconnect...]
+>>>[Attempting to disconnect...]
+>>>[Attempting to disconnect...]
+>>>[Attempting to disconnect...]
+>>>[Attempting to disconnect...]
+>>>[Server not responding.]
+>>>[Exiting.}
+
+Y output:
+>>>[Registration message was sent.]
+>>>[Client now listening.]
+[Welcome, you are registered.]
+[Client table updated.]
+x 127.0.0.1 5000 Online
+y 127.0.0.1 6000 Online
+>>>dereg y
+>>>[Attempting to disconnect...]
+[Client table updated.]
+x 127.0.0.1 5000 Online
+y 127.0.0.1 6000 Offline
+
+>>>[You are offline. Bye.]
+
+
+Test 3:
+X output:
+>>>[Registration message was sent.]
+>>>[Client now listening.]
+[Welcome, you are registered.]
+[Client table updated.]
+x 127.0.0.1 5000 Online
+>>>[Client table updated.]
+x 127.0.0.1 5000 Online
+y 127.0.0.1 6000 Online
+[Client table updated.]
+x 127.0.0.1 5000 Online
+y 127.0.0.1 6000 Online
+z 127.0.0.1 7000 Online
+[Client table updated.]
+x 127.0.0.1 5000 Online
+y 127.0.0.1 6000 Online
+z 127.0.0.1 7000 Online
+a 127.0.0.1 8000 Online
+create_group group1
+>>>>>>[Group group1 created by Server.]
+
+>>>
+ >>>[Invalid input.]
+>>>join group_1
+>>>[Invalid input.]
+>>>join_group group1
+>>>(group1) [Sucessfully joined group.]
+>>>(group1) send_group hello
+
+>>>(group1) x: hello
+
+>>> (group1) [Message received by server]
+>>>(group1)
+
+Y output:
+>>>[Registration message was sent.]
+>>>[Client now listening.]
+[Welcome, you are registered.]
+[Client table updated.]
+x 127.0.0.1 5000 Online
+y 127.0.0.1 6000 Online
+>>>[Client table updated.]
+x 127.0.0.1 5000 Online
+y 127.0.0.1 6000 Online
+z 127.0.0.1 7000 Online
+[Client table updated.]
+x 127.0.0.1 5000 Online
+y 127.0.0.1 6000 Online
+z 127.0.0.1 7000 Online
+a 127.0.0.1 8000 Online
+join_group group1
+>>>(group1) [Sucessfully joined group.]
+>>>(group1)
+>>>(group1) x: hello
+
+Z output:
+>>>[Registration message was sent.]
+>>>[Client now listening.]
+[Welcome, you are registered.]
+[Client table updated.]
+x 127.0.0.1 5000 Online
+y 127.0.0.1 6000 Online
+z 127.0.0.1 7000 Online
+>>>[Client table updated.]
+x 127.0.0.1 5000 Online
+y 127.0.0.1 6000 Online
+z 127.0.0.1 7000 Online
+a 127.0.0.1 8000 Online
+join_group group1
+>>>(group1) [Sucessfully joined group.]
+>>>(group1)
+>>>(group1) x: hello
+
+>>>
+>>>a: hi
+
+A output:
+>>>[Registration message was sent.]
+>>>[Client now listening.]
+[Welcome, you are registered.]
+[Client table updated.]
+x 127.0.0.1 5000 Online
+y 127.0.0.1 6000 Online
+z 127.0.0.1 7000 Online
+a 127.0.0.1 8000 Online
+>>>send z hi
+>>>[Message received by z.]
+>>>
+
+TEST 4:
+creating group, speaking, looking at members, one leaving, looking at members, one dereg from group mode,
+looking at members, one ctrl-c
+
+--Client output:
+
+>>>[Server is online.]
+>>>[The client address is: ('127.0.0.1', 5000)
+>>>[The header is: register]
+>>>[USERNAME x added to table.]
+>>>[The client address is: ('127.0.0.1', 6000)
+>>>[The header is: register]
+>>>[USERNAME y added to table.]
+>>>[The client address is: ('127.0.0.1', 8000)
+>>>[The header is: register]
+>>>[USERNAME a added to table.]
+>>>[The client address is: ('127.0.0.1', 5000)
+>>>[The header is: create_group]
+>>>[The client address is: ('127.0.0.1', 6000)
+>>>[The header is: list_groups]
+>>>[The client address is: ('127.0.0.1', 6000)
+>>>[The header is: join_group]
+y added to group group1
+>>>[The client address is: ('127.0.0.1', 8000)
+>>>[The header is: join_group]
+a added to group group1
+>>>[The client address is: ('127.0.0.1', 8000)
+>>>[The header is: group_msg]
+>>>[The client address is: ('127.0.0.1', 5000)
+>>>[The header is: join_group]
+x added to group group1
+>>>[The client address is: ('127.0.0.1', 8000)
+>>>[The header is: group_msg]
+>>>[The client address is: ('127.0.0.1', 5000)
+>>>[The header is: leave_group]
+User x removed from group group1
+>>>[The client address is: ('127.0.0.1', 8000)
+>>>[The header is: list_members]
+>>>[The client address is: ('127.0.0.1', 6000)
+>>>[The header is: leave_group]
+User y removed from group group1
+>>>[The client address is: ('127.0.0.1', 6000)
+>>>[The header is: dereg]
+>>>[Username y is now offline. Table updated.]
+>>>[The client address is: ('127.0.0.1', 8000)
+>>>[The header is: list_members]
+
+--X output:
+
+>>>[Registration message was sent.]
+>>>[Client now listening.]
+[Welcome, you are registered.]
+[Client table updated.]
+x 127.0.0.1 5000 Online
+>>>[Client table updated.]
+x 127.0.0.1 5000 Online
+y 127.0.0.1 6000 Online
+[Client table updated.]
+x 127.0.0.1 5000 Online
+y 127.0.0.1 6000 Online
+a 127.0.0.1 8000 Online
+create_group group1
+>>>>>>[Group group1 created by Server.]
+
+>>>join_group group1
+ >>>(group1) [Sucessfully joined group.]
+>>>(group1)
+>>>(group1) a: hello
+
+>>>leave_group
+ >>>
+>>>[Client table updated.]
+x 127.0.0.1 5000 Online
+y 127.0.0.1 6000 Offline
+a 127.0.0.1 8000 Online
+
+--Y output:
+
+>>>[Registration message was sent.]
+>>>[Client now listening.]
+[Welcome, you are registered.]
+[Client table updated.]
+x 127.0.0.1 5000 Online
+y 127.0.0.1 6000 Online
+>>>[Client table updated.]
+x 127.0.0.1 5000 Online
+y 127.0.0.1 6000 Online
+a 127.0.0.1 8000 Online
+list_groups
+>>>>>>[Available group chats:]
+['group1']
+
+>>>join_group group1
+ >>>(group1) [Sucessfully joined group.]
+>>>(group1)
+>>>(group1) a: hello
+
+>>>
+>>>(group1) a: hello
+
+>>>^C >>>[Attempting to disconnect...]
+[Client table updated.]
+x 127.0.0.1 5000 Online
+y 127.0.0.1 6000 Offline
+a 127.0.0.1 8000 Online
+
+>>>[You are offline. Bye.]
+
+--A output:
+
+>>>[Registration message was sent.]
+>>>[Client now listening.]
+[Welcome, you are registered.]
+[Client table updated.]
+x 127.0.0.1 5000 Online
+y 127.0.0.1 6000 Online
+a 127.0.0.1 8000 Online
+>>>join_group group1
+>>>(group1) [Sucessfully joined group.]
+>>>(group1) send_group hello
+
+>>>(group1) a: hello
+
+>>> (group1) [Message received by server]
+>>>(group1) send_group hello
+
+>>>(group1) a: hello
+
+>>> (group1) [Message received by server]
+>>>(group1) list_members
+>>>(group1)
+>>>(group1) [Group Members:]
+y a
+
+>>>(group1) [Client table updated.]
+x 127.0.0.1 5000 Online
+y 127.0.0.1 6000 Offline
+a 127.0.0.1 8000 Online
+list_members
+>>>(group1)
+>>>(group1) [Group Members:]
+a
+
+>>>(group1)
